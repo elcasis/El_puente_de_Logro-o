@@ -11,79 +11,69 @@
             padding: 0;
         }
         body {
-            background-color: #111;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            height: 100dvh;
-            overflow: hidden;
+            background-color: #000;
+            overflow: hidden; /* Evita scroll */
             font-family: 'Courier New', Courier, monospace;
             color: #fff;
-            touch-action: none; /* Evita zoom y scroll global */
+            touch-action: none; /* Evita zoom y scroll al tocar */
+            height: 100vh;
+            height: 100dvh;
         }
 
-        /* --- PANTALLA DE INICIO --- */
+        /* --- PANTALLA DE INICIO (Fija y centrada) --- */
         #startScreen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.95);
+            background: radial-gradient(circle, #222 0%, #000 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 100;
+            z-index: 1000; /* Siempre por encima de todo */
         }
         #startScreen h1 {
-            font-size: clamp(28px, 7vw, 45px);
+            font-size: clamp(28px, 8vw, 50px);
             color: #f1c40f;
             text-align: center;
-            margin-bottom: 10px;
-            text-shadow: 3px 3px 0 #000;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 0 #c0392b;
+            padding: 0 20px;
         }
         #startScreen p {
-            font-size: clamp(14px, 3.5vw, 18px);
+            font-size: clamp(14px, 4vw, 20px);
             color: #ccc;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
             text-align: center;
-            padding: 0 20px;
+            padding: 0 30px;
         }
         #startBtn {
             font-family: monospace;
-            font-size: clamp(20px, 5vw, 28px);
+            font-size: clamp(24px, 6vw, 32px);
             font-weight: bold;
-            padding: 20px 50px;
+            padding: 25px 60px;
             background-color: #c0392b;
             color: white;
-            border: 4px solid #e74c3c;
+            border: none;
             border-radius: 15px;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            box-shadow: 0 10px 30px rgba(192, 57, 43, 0.5);
+            animation: pulse 2s infinite;
         }
-        #startBtn:active {
-            transform: scale(0.95);
-            background-color: #e74c3c;
-        }
-
-        /* --- LAYOUT PRINCIPAL (JUEGO + MANDO) --- */
-        #gameWrapper {
-            width: 100%;
-            max-width: 800px;
-            height: 100%;
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
-        /* --- INTERFAZ SUPERIOR --- */
+        /* --- INTERFAZ DEL JUEGO --- */
         #ui {
-            position: absolute;
+            position: fixed;
             top: 0; left: 0; right: 0;
-            padding: 10px 20px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
             pointer-events: none;
             z-index: 10;
         }
@@ -103,77 +93,80 @@
         }
 
         /* --- CANVAS --- */
-        canvas {
+        #gameCanvas {
             background-color: #2c5f8a;
             width: 100%;
-            flex-grow: 1; /* Ocupa el espacio que deja el mando */
+            /* Calcula la altura total de la pantalla menos los 160px que ocupa el mando táctil abajo */
+            height: calc(100dvh - 160px); 
             display: block;
         }
 
-        /* --- MANDO TÁCTIL --- */
+        /* --- MANDO TÁCTIL FIJO EN LA PARTE INFERIOR --- */
         #gamepad {
-            height: 140px;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 160px;
             background-color: #1a1a1a;
-            border-top: 3px solid #333;
+            border-top: 4px solid #333;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 20px;
-            z-index: 20;
+            padding: 15px 25px;
+            z-index: 50; /* Siempre visible encima del canvas */
         }
         .pad-side {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             align-items: center;
         }
         .pad-side.right {
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
+        
+        /* Estilo de los botones */
         .ctrl-btn {
             background-color: rgba(255, 255, 255, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            border-radius: 15px;
             color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             user-select: none;
             -webkit-user-select: none;
-            -webkit-touch-callout: none;
             touch-action: manipulation;
             transition: background-color 0.05s;
         }
         .ctrl-btn.active {
-            background-color: rgba(255, 255, 255, 0.5);
-            border-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.6);
+            transform: scale(0.95);
         }
         
-        /* Botones específicos */
         .btn-dir {
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
+            width: 75px;
+            height: 75px;
+            font-size: 30px;
         }
         .btn-gas {
-            width: 90px;
-            height: 55px;
-            font-size: 20px;
+            width: 110px;
+            height: 65px;
+            font-size: 22px;
             font-weight: bold;
             background-color: rgba(46, 204, 113, 0.3);
-            border-color: rgba(46, 204, 113, 0.6);
+            border-color: rgba(46, 204, 113, 0.7);
         }
-        .btn-gas.active { background-color: rgba(46, 204, 113, 0.7); }
+        .btn-gas.active { background-color: rgba(46, 204, 113, 0.8); }
         
         .btn-brake {
-            width: 90px;
-            height: 45px;
-            font-size: 20px;
+            width: 110px;
+            height: 55px;
+            font-size: 22px;
             font-weight: bold;
             background-color: rgba(231, 76, 60, 0.3);
-            border-color: rgba(231, 76, 60, 0.6);
+            border-color: rgba(231, 76, 60, 0.7);
         }
-        .btn-brake.active { background-color: rgba(231, 76, 60, 0.7); }
+        .btn-brake.active { background-color: rgba(231, 76, 60, 0.8); }
 
     </style>
 </head>
@@ -186,25 +179,24 @@
         <button id="startBtn">JUGAR</button>
     </div>
 
-    <!-- CONTENEDOR DEL JUEGO -->
-    <div id="gameWrapper">
-        <div id="ui">
-            <div class="game-title">Logroño</div>
-            <div class="game-score">POSTES: <span id="score">0</span></div>
-        </div>
-        
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <!-- INTERFAZ DURANTE EL JUEGO -->
+    <div id="ui">
+        <div class="game-title">Logroño</div>
+        <div class="game-score">POSTES: <span id="score">0</span></div>
+    </div>
+    
+    <!-- JUEGO -->
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-        <!-- MANDO TÁCTIL SEPARADO DEL CANVAS -->
-        <div id="gamepad">
-            <div class="pad-side left">
-                <button class="ctrl-btn btn-dir" id="btnLeft">◀</button>
-                <button class="ctrl-btn btn-dir" id="btnRight">▶</button>
-            </div>
-            <div class="pad-side right">
-                <button class="ctrl-btn btn-gas" id="btnUp">GAS ▲</button>
-                <button class="ctrl-btn btn-brake" id="btnDown">FRENO ▼</button>
-            </div>
+    <!-- MANDO TÁCTIL -->
+    <div id="gamepad">
+        <div class="pad-side left">
+            <button class="ctrl-btn btn-dir" id="btnLeft">◀</button>
+            <button class="ctrl-btn btn-dir" id="btnRight">▶</button>
+        </div>
+        <div class="pad-side right">
+            <button class="ctrl-btn btn-gas" id="btnUp">GAS ▲</button>
+            <button class="ctrl-btn btn-brake" id="btnDown">FRENO ▼</button>
         </div>
     </div>
 
@@ -215,26 +207,24 @@
     const startScreen = document.getElementById('startScreen');
     const startBtn = document.getElementById('startBtn');
 
-    // --- ESTADOS DEL JUEGO ---
     let gameStarted = false;
     let score = 0;
     let gameOver = false;
 
-    // --- CONFIGURACIÓN DEL MUNDO ---
     const BRIDGE_WIDTH = 250;
     const BRIDGE_LEFT = (canvas.width - BRIDGE_WIDTH) / 2;
     const BRIDGE_RIGHT = BRIDGE_LEFT + BRIDGE_WIDTH;
     const BRIDGE_LENGTH = 4000; 
     const FINISH_LINE_Y = -BRIDGE_LENGTH + 200;
 
-    // --- MODELO DEL COCHE ---
+    // --- MODELO DEL COCHE (Inicia mirando hacia arriba) ---
     const car = {
         x: canvas.width / 2,
         y: canvas.height - 100,
         width: 40,
         height: 20,
         radius: 20,
-        angle: 0,          
+        angle: -Math.PI / 2, // Mirando hacia arriba
         speed: 0,
         maxSpeed: 7,
         backSpeed: -3,
@@ -243,7 +233,6 @@
         turnSpeed: 0.04    
     };
 
-    // --- POSTES ---
     const posts = [];
     function generatePosts() {
         for (let y = 0; y > -BRIDGE_LENGTH; y -= 80) {
@@ -261,10 +250,9 @@
     }
     generatePosts();
 
-    // --- GESTIÓN DE INPUTS ---
     const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
 
-    // Teclado PC
+    // Controles para PC (Teclado)
     window.addEventListener('keydown', (e) => {
         if (e.key in keys) { keys[e.key] = true; e.preventDefault(); }
         if (e.key === 'r' && gameOver) location.reload();
@@ -273,12 +261,12 @@
         if (e.key in keys) keys[e.key] = false;
     });
 
-    // Configuración Ultra-Robusta de Botones Táctiles
+    // Controles para Móvil (Eventos de puntero súper robustos)
     function setupTouchButton(id, keyName) {
         const btn = document.getElementById(id);
         
         const press = (e) => {
-            e.preventDefault();
+            e.preventDefault(); // Evita que el navegador haga cosas raras
             keys[keyName] = true;
             btn.classList.add('active'); // Feedback visual
         };
@@ -289,13 +277,14 @@
             btn.classList.remove('active');
         };
 
-        // Usamos Pointer Events (une ratón y táctil)
+        // Usamos Pointer Events (funciona para ratón y dedos)
         btn.addEventListener('pointerdown', press);
         btn.addEventListener('pointerup', release);
         btn.addEventListener('pointerleave', release); // Si el dedo se sale del botón
-        btn.addEventListener('pointercancel', release); // Si el sistema cancela el toque
+        btn.addEventListener('pointercancel', release); // Si el sistema interrumpe el toque
     }
 
+    // Configuramos los 4 botones
     setupTouchButton('btnUp', 'ArrowUp');
     setupTouchButton('btnDown', 'ArrowDown');
     setupTouchButton('btnLeft', 'ArrowLeft');
@@ -304,7 +293,7 @@
     // --- INICIO DEL JUEGO ---
     startBtn.addEventListener('click', () => {
         gameStarted = true;
-        startScreen.style.display = 'none';
+        startScreen.style.display = 'none'; // Oculta la pantalla de inicio
     });
 
     // --- LÓGICA DE LAS FÍSICAS ---
@@ -329,7 +318,6 @@
         car.x += Math.cos(car.angle) * car.speed;
         car.y += Math.sin(car.angle) * car.speed;
 
-        // Colisiones bordes
         if (car.x < BRIDGE_LEFT + car.width/2) {
             car.x = BRIDGE_LEFT + car.width/2;
             car.speed *= -0.3;
@@ -371,15 +359,12 @@
         const cameraY = car.y - canvas.height * 0.7; 
         ctx.translate(0, -cameraY);
 
-        // Agua
         ctx.fillStyle = '#2c5f8a';
         ctx.fillRect(0, -BRIDGE_LENGTH - 500, canvas.width, BRIDGE_LENGTH + canvas.height + 1000);
 
-        // Puente
         ctx.fillStyle = '#555';
         ctx.fillRect(BRIDGE_LEFT, -BRIDGE_LENGTH - 100, BRIDGE_WIDTH, BRIDGE_LENGTH + canvas.height + 200);
         
-        // Líneas puente
         ctx.strokeStyle = '#fff';
         ctx.setLineDash([20, 15]);
         ctx.lineWidth = 2;
@@ -389,12 +374,10 @@
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Barreras
         ctx.fillStyle = '#c0392b';
         ctx.fillRect(BRIDGE_LEFT - 10, -BRIDGE_LENGTH - 100, 10, BRIDGE_LENGTH + canvas.height + 200);
         ctx.fillRect(BRIDGE_RIGHT, -BRIDGE_LENGTH - 100, 10, BRIDGE_LENGTH + canvas.height + 200);
 
-        // Meta
         ctx.fillStyle = '#fff';
         ctx.fillRect(BRIDGE_LEFT, FINISH_LINE_Y, BRIDGE_WIDTH, 5);
         ctx.save();
@@ -404,7 +387,6 @@
         ctx.fillText("LOGROÑO", canvas.width/2, FINISH_LINE_Y - 10);
         ctx.restore();
 
-        // Postes
         for (let post of posts) {
             if (post.knockedDown) {
                 post.opacity -= 0.02;
@@ -426,7 +408,6 @@
             }
         }
 
-        // Coche
         ctx.save();
         ctx.translate(car.x, car.y);
         ctx.rotate(car.angle);
@@ -442,9 +423,8 @@
         ctx.fillRect(-car.width / 2, car.height / 2 - 6, 3, 4);
         ctx.restore();
 
-        ctx.restore(); // Cámara
+        ctx.restore();
 
-        // --- PANTALLA DE VICTORIA ---
         if (gameOver) {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -468,7 +448,6 @@
         }
     }
 
-    // --- GAME LOOP ---
     function loop() {
         update();
         draw();
