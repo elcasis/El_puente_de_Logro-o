@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>El puente de Logroño</title>
     <style>
         * {
@@ -11,28 +11,75 @@
             padding: 0;
         }
         body {
-            background-color: #222;
+            background-color: #111;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            height: 100dvh;
             overflow: hidden;
             font-family: 'Courier New', Courier, monospace;
             color: #fff;
+            touch-action: none; /* Evita zoom y scroll global */
         }
-        canvas {
-            background-color: #2c5f8a; /* Color agua */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 2px solid #555;
+
+        /* --- PANTALLA DE INICIO --- */
+        #startScreen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
         }
-        /* Nuevo estilo para la interfaz con el título */
+        #startScreen h1 {
+            font-size: clamp(28px, 7vw, 45px);
+            color: #f1c40f;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0 #000;
+        }
+        #startScreen p {
+            font-size: clamp(14px, 3.5vw, 18px);
+            color: #ccc;
+            margin-bottom: 40px;
+            text-align: center;
+            padding: 0 20px;
+        }
+        #startBtn {
+            font-family: monospace;
+            font-size: clamp(20px, 5vw, 28px);
+            font-weight: bold;
+            padding: 20px 50px;
+            background-color: #c0392b;
+            color: white;
+            border: 4px solid #e74c3c;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+        }
+        #startBtn:active {
+            transform: scale(0.95);
+            background-color: #e74c3c;
+        }
+
+        /* --- LAYOUT PRINCIPAL (JUEGO + MANDO) --- */
+        #gameWrapper {
+            width: 100%;
+            max-width: 800px;
+            height: 100%;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- INTERFAZ SUPERIOR --- */
         #ui {
             position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 800px; /* Mismo ancho que el canvas */
-            padding: 15px 30px;
+            top: 0; left: 0; right: 0;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -41,49 +88,144 @@
             z-index: 10;
         }
         .game-title {
-            font-size: 24px;
+            font-size: clamp(16px, 4vw, 24px);
             font-weight: bold;
             color: #f1c40f;
-            text-transform: uppercase;
-            letter-spacing: 2px;
             text-shadow: 2px 2px 0 #000;
         }
         .game-score {
-            font-size: 20px;
+            font-size: clamp(14px, 3vw, 20px);
             text-shadow: 2px 2px 0 #000;
         }
         .game-score span {
             color: #ff3333;
             font-weight: bold;
+        }
+
+        /* --- CANVAS --- */
+        canvas {
+            background-color: #2c5f8a;
+            width: 100%;
+            flex-grow: 1; /* Ocupa el espacio que deja el mando */
+            display: block;
+        }
+
+        /* --- MANDO TÁCTIL --- */
+        #gamepad {
+            height: 140px;
+            background-color: #1a1a1a;
+            border-top: 3px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            z-index: 20;
+        }
+        .pad-side {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .pad-side.right {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .ctrl-btn {
+            background-color: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
+            transition: background-color 0.05s;
+        }
+        .ctrl-btn.active {
+            background-color: rgba(255, 255, 255, 0.5);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Botones específicos */
+        .btn-dir {
+            width: 60px;
+            height: 60px;
             font-size: 24px;
         }
+        .btn-gas {
+            width: 90px;
+            height: 55px;
+            font-size: 20px;
+            font-weight: bold;
+            background-color: rgba(46, 204, 113, 0.3);
+            border-color: rgba(46, 204, 113, 0.6);
+        }
+        .btn-gas.active { background-color: rgba(46, 204, 113, 0.7); }
+        
+        .btn-brake {
+            width: 90px;
+            height: 45px;
+            font-size: 20px;
+            font-weight: bold;
+            background-color: rgba(231, 76, 60, 0.3);
+            border-color: rgba(231, 76, 60, 0.6);
+        }
+        .btn-brake.active { background-color: rgba(231, 76, 60, 0.7); }
+
     </style>
 </head>
 <body>
 
-    <div id="ui">
-        <div class="game-title">El puente de Logroño</div>
-        <div class="game-score">POSTES: <span id="score">0</span></div>
+    <!-- PANTALLA DE INICIO -->
+    <div id="startScreen">
+        <h1>El puente de Logroño</h1>
+        <p>¡Acelera y destroza todos los postes que puedas!</p>
+        <button id="startBtn">JUGAR</button>
     </div>
-    
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <!-- CONTENEDOR DEL JUEGO -->
+    <div id="gameWrapper">
+        <div id="ui">
+            <div class="game-title">Logroño</div>
+            <div class="game-score">POSTES: <span id="score">0</span></div>
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <!-- MANDO TÁCTIL SEPARADO DEL CANVAS -->
+        <div id="gamepad">
+            <div class="pad-side left">
+                <button class="ctrl-btn btn-dir" id="btnLeft">◀</button>
+                <button class="ctrl-btn btn-dir" id="btnRight">▶</button>
+            </div>
+            <div class="pad-side right">
+                <button class="ctrl-btn btn-gas" id="btnUp">GAS ▲</button>
+                <button class="ctrl-btn btn-brake" id="btnDown">FRENO ▼</button>
+            </div>
+        </div>
+    </div>
 
 <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const scoreElement = document.getElementById('score');
+    const startScreen = document.getElementById('startScreen');
+    const startBtn = document.getElementById('startBtn');
+
+    // --- ESTADOS DEL JUEGO ---
+    let gameStarted = false;
+    let score = 0;
+    let gameOver = false;
 
     // --- CONFIGURACIÓN DEL MUNDO ---
     const BRIDGE_WIDTH = 250;
     const BRIDGE_LEFT = (canvas.width - BRIDGE_WIDTH) / 2;
     const BRIDGE_RIGHT = BRIDGE_LEFT + BRIDGE_WIDTH;
     const BRIDGE_LENGTH = 4000; 
-    
     const FINISH_LINE_Y = -BRIDGE_LENGTH + 200;
-
-    // --- ESTADO DEL JUEGO ---
-    let score = 0;
-    let gameOver = false;
 
     // --- MODELO DEL COCHE ---
     const car = {
@@ -122,23 +264,52 @@
     // --- GESTIÓN DE INPUTS ---
     const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
 
+    // Teclado PC
     window.addEventListener('keydown', (e) => {
-        if (e.key in keys) {
-            keys[e.key] = true;
-            e.preventDefault();
-        }
-        if (e.key === 'r' && gameOver) {
-            location.reload();
-        }
+        if (e.key in keys) { keys[e.key] = true; e.preventDefault(); }
+        if (e.key === 'r' && gameOver) location.reload();
     });
-
     window.addEventListener('keyup', (e) => {
         if (e.key in keys) keys[e.key] = false;
     });
 
+    // Configuración Ultra-Robusta de Botones Táctiles
+    function setupTouchButton(id, keyName) {
+        const btn = document.getElementById(id);
+        
+        const press = (e) => {
+            e.preventDefault();
+            keys[keyName] = true;
+            btn.classList.add('active'); // Feedback visual
+        };
+        
+        const release = (e) => {
+            e.preventDefault();
+            keys[keyName] = false;
+            btn.classList.remove('active');
+        };
+
+        // Usamos Pointer Events (une ratón y táctil)
+        btn.addEventListener('pointerdown', press);
+        btn.addEventListener('pointerup', release);
+        btn.addEventListener('pointerleave', release); // Si el dedo se sale del botón
+        btn.addEventListener('pointercancel', release); // Si el sistema cancela el toque
+    }
+
+    setupTouchButton('btnUp', 'ArrowUp');
+    setupTouchButton('btnDown', 'ArrowDown');
+    setupTouchButton('btnLeft', 'ArrowLeft');
+    setupTouchButton('btnRight', 'ArrowRight');
+
+    // --- INICIO DEL JUEGO ---
+    startBtn.addEventListener('click', () => {
+        gameStarted = true;
+        startScreen.style.display = 'none';
+    });
+
     // --- LÓGICA DE LAS FÍSICAS ---
     function update() {
-        if (gameOver) return;
+        if (!gameStarted || gameOver) return;
 
         if (keys.ArrowUp) {
             car.speed = Math.min(car.speed + car.acc, car.maxSpeed);
@@ -158,7 +329,7 @@
         car.x += Math.cos(car.angle) * car.speed;
         car.y += Math.sin(car.angle) * car.speed;
 
-        // Colisiones con los bordes del puente
+        // Colisiones bordes
         if (car.x < BRIDGE_LEFT + car.width/2) {
             car.x = BRIDGE_LEFT + car.width/2;
             car.speed *= -0.3;
@@ -167,7 +338,6 @@
             car.x = BRIDGE_RIGHT - car.width/2;
             car.speed *= -0.3;
         }
-        
         if (car.y > canvas.height - 50) car.y = canvas.height - 50;
 
         checkPostCollisions();
@@ -180,7 +350,6 @@
     function checkPostCollisions() {
         for (let post of posts) {
             if (post.knockedDown) continue;
-
             const dx = car.x - post.x;
             const dy = car.y - post.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -198,20 +367,19 @@
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // --- SISTEMA DE CÁMARA ---
         ctx.save();
         const cameraY = car.y - canvas.height * 0.7; 
         ctx.translate(0, -cameraY);
 
-        // Dibujar Agua
+        // Agua
         ctx.fillStyle = '#2c5f8a';
         ctx.fillRect(0, -BRIDGE_LENGTH - 500, canvas.width, BRIDGE_LENGTH + canvas.height + 1000);
 
-        // Dibujar Puente
+        // Puente
         ctx.fillStyle = '#555';
         ctx.fillRect(BRIDGE_LEFT, -BRIDGE_LENGTH - 100, BRIDGE_WIDTH, BRIDGE_LENGTH + canvas.height + 200);
         
-        // Líneas del puente
+        // Líneas puente
         ctx.strokeStyle = '#fff';
         ctx.setLineDash([20, 15]);
         ctx.lineWidth = 2;
@@ -221,16 +389,14 @@
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Bordes del puente (Barreras)
+        // Barreras
         ctx.fillStyle = '#c0392b';
         ctx.fillRect(BRIDGE_LEFT - 10, -BRIDGE_LENGTH - 100, 10, BRIDGE_LENGTH + canvas.height + 200);
         ctx.fillRect(BRIDGE_RIGHT, -BRIDGE_LENGTH - 100, 10, BRIDGE_LENGTH + canvas.height + 200);
 
-        // Dibujar Meta
+        // Meta
         ctx.fillStyle = '#fff';
         ctx.fillRect(BRIDGE_LEFT, FINISH_LINE_Y, BRIDGE_WIDTH, 5);
-        
-        // Texto de meta en el suelo
         ctx.save();
         ctx.font = "bold 20px 'Courier New', monospace";
         ctx.fillStyle = '#2ecc71';
@@ -238,12 +404,11 @@
         ctx.fillText("LOGROÑO", canvas.width/2, FINISH_LINE_Y - 10);
         ctx.restore();
 
-        // Dibujar Postes
+        // Postes
         for (let post of posts) {
             if (post.knockedDown) {
                 post.opacity -= 0.02;
                 if (post.opacity <= 0) continue;
-                
                 ctx.globalAlpha = post.opacity;
                 ctx.fillStyle = '#95a5a6';
                 ctx.beginPath();
@@ -261,51 +426,45 @@
             }
         }
 
-        // Dibujar Coche
+        // Coche
         ctx.save();
         ctx.translate(car.x, car.y);
         ctx.rotate(car.angle);
-
         ctx.fillStyle = '#ff3333';
         ctx.fillRect(-car.width / 2, -car.height / 2, car.width, car.height);
-        
         ctx.fillStyle = '#cc0000';
         ctx.fillRect(-5, -car.height/2 + 3, 15, car.height - 6);
-
         ctx.fillStyle = '#ffff00';
         ctx.fillRect(car.width / 2 - 5, -car.height / 2 + 2, 5, 4);
         ctx.fillRect(car.width / 2 - 5, car.height / 2 - 6, 5, 4);
-
         ctx.fillStyle = '#ff0000';
         ctx.fillRect(-car.width / 2, -car.height / 2 + 2, 3, 4);
         ctx.fillRect(-car.width / 2, car.height / 2 - 6, 3, 4);
-
         ctx.restore();
 
-        ctx.restore(); // Restaurar cámara
+        ctx.restore(); // Cámara
 
         // --- PANTALLA DE VICTORIA ---
         if (gameOver) {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
             ctx.textAlign = 'center';
             
-            ctx.font = 'bold 20px monospace';
+            ctx.font = 'bold 24px monospace';
             ctx.fillStyle = '#f1c40f';
             ctx.fillText('¡BIENVENIDO A', canvas.width/2, canvas.height/2 - 60);
             
             ctx.font = 'bold 40px monospace';
             ctx.fillStyle = '#fff';
-            ctx.fillText('EL PUENTE DE LOGROÑO!', canvas.width/2, canvas.height/2 - 20);
+            ctx.fillText('LOGROÑO!', canvas.width/2, canvas.height/2 - 20);
             
             ctx.font = '24px monospace';
             ctx.fillStyle = '#ff3333';
-            ctx.fillText(`POSTES DESTROZADOS: ${score}`, canvas.width/2, canvas.height/2 + 30);
+            ctx.fillText(`POSTES: ${score}`, canvas.width/2, canvas.height/2 + 30);
             
             ctx.font = '18px monospace';
             ctx.fillStyle = '#aaa';
-            ctx.fillText('Presiona "R" para volver a cruzar', canvas.width/2, canvas.height/2 + 70);
+            ctx.fillText('Recarga para volver a jugar', canvas.width/2, canvas.height/2 + 70);
         }
     }
 
